@@ -40,7 +40,6 @@ const Navbar = () => {
             tl2.from(".hamburger", {
                 x: 200,
                 opacity: 0,
-                duration: 1,
             })
 
             tl2.from('.one , .two , .three , .cross', {
@@ -54,7 +53,7 @@ const Navbar = () => {
     return (
 
         <div>
-<div className="bg-navy flex justify-between max-w-[100%] navv py-3 px-5 relative z-50">
+<div className="bg-navy flex items-center justify-between max-w-[100%] navv py-3 px-5 relative z-50">
                 <h1 className=" text-xl sm:text-2xl md:text-4xl my-poppins text-white font-bold head">Expense Tracker</h1>
                 <NavigationMenu className="">
 
