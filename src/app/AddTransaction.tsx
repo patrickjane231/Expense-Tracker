@@ -10,14 +10,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import Navbar from "./Navbar"
-import {  useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import {
     Select,
@@ -32,75 +31,77 @@ import { useLocation } from "react-router-dom"
 import { startTransition } from "react"
 import { useGSAP } from "@gsap/react"
 import gsap from 'gsap'
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 
-export interface transactionn{
-    id : string,
-    Amount : number,
-    Description : string,
-    Category : string,
-    Date : Date
-    type : string
+export interface transactionn {
+    id: string,
+    Amount: number,
+    Description: string,
+    Category: string,
+    Date: Date
+    type: string
 }
 
 const AddTransaction = () => {
 
-    useGSAP(()=>{
-        gsap.from('.myCard',{
-            y : 30,
-            opacity : 0,
-            delay : 1
+    useGSAP(() => {
+        gsap.from('.myCard', {
+            y: 30,
+            opacity: 0,
+            delay: 1
         })
     })
 
-    const [transaction,setTransaction]=useState<transactionn[]>(
-            JSON.parse(localStorage.getItem('transactions') ?? "[]") 
-        )
+    const [transaction, setTransaction] = useState<transactionn[]>(
+        JSON.parse(localStorage.getItem('transactions') ?? "[]")
+    )
     const [date, setDate] = useState<Date | undefined>()
-    const [amount,setAmount]=useState(0);
-    const [description,setDescription]=useState<string>('');
-    const [category,setCategory]=useState<string>('');
-    const [type,setType]=useState<string>("Expense")
-    const[tid,setTid]=useState<string>(crypto.randomUUID())
+    const [amount, setAmount] = useState(0);
+    const [description, setDescription] = useState<string>('');
+    const [category, setCategory] = useState<string>('');
+    const [type, setType] = useState<string>("Expense")
+    const [tid, setTid] = useState<string>(crypto.randomUUID())
     const location = useLocation()
 
-    useEffect(()=>{
-        const editTransaction:transactionn=location.state?.editTrans
-        if(editTransaction){
-            startTransition(()=>{
-            setTid(editTransaction.id)
-            setDate(editTransaction.Date)
-            setType(editTransaction.type)
-            setAmount(editTransaction.Amount)
-            setDescription(editTransaction.Description)
-            setCategory(editTransaction.Category)
+    useEffect(() => {
+        const editTransaction: transactionn = location.state?.editTrans
+        if (editTransaction) {
+            startTransition(() => {
+                setTid(editTransaction.id)
+                setDate(editTransaction.Date)
+                setType(editTransaction.type)
+                setAmount(editTransaction.Amount)
+                setDescription(editTransaction.Description)
+                setCategory(editTransaction.Category)
             })
         }
-    },[location.state])
+    }, [location.state])
 
-    function addTransaction(){
-        
-        if(!amount || !date || !category){
-            return alert("Please Enter All Field");
+    function addTransaction() {
+
+        if (!amount || !date || !category) {
+            return false;
         }
-        const newTransaction:transactionn={
-            id : tid,
-            type : type,
-            Date : date,
-            Amount : amount,
-            Category  : category,
-            Description : description
+        const newTransaction: transactionn = {
+            id: tid,
+            type: type,
+            Date: date,
+            Amount: amount,
+            Category: category,
+            Description: description
         }
 
-        
 
-        const updateTransactions=transaction.some(t=>t.id === tid) ?
-        transaction.map((t)=>t.id === tid ? newTransaction : t)
-        :[...transaction,newTransaction];
 
-        localStorage.setItem("transactions",JSON.stringify(updateTransactions))
+        const updateTransactions = transaction.some(t => t.id === tid) ?
+            transaction.map((t) => t.id === tid ? newTransaction : t)
+            : [...transaction, newTransaction];
+
+        localStorage.setItem("transactions", JSON.stringify(updateTransactions))
         setTransaction(updateTransactions)
-    
+
 
         setAmount(0)
         setDescription('')
@@ -108,6 +109,14 @@ const AddTransaction = () => {
         setType('')
         setDate(undefined)
 
+        return true
+
+    }
+
+    function undoTransaction(tid:string){
+        const updateTransactions =transaction.filter((trans)=>trans.id!==tid)
+        localStorage.setItem("transactions", JSON.stringify(updateTransactions))
+        setTransaction(updateTransactions)
     }
 
 
@@ -123,12 +132,12 @@ const AddTransaction = () => {
 
                         <RadioGroup className="flex gap-10  p-2 rounded border-2">
                             <div className="flex gap-3">
-                                <RadioGroupItem value="Expense" id="r1" checked={type==='Expense'} onClick={()=>setType("Expense")} />
+                                <RadioGroupItem value="Expense" id="r1" checked={type === 'Expense'} onClick={() => setType("Expense")} />
                                 <Label htmlFor="r1">Expense</Label>
                             </div>
 
                             <div className="flex gap-3">
-                                <RadioGroupItem value="Income" id="r1" checked={type==='Income'} onClick={()=>setType("Income")}/>
+                                <RadioGroupItem value="Income" id="r1" checked={type === 'Income'} onClick={() => setType("Income")} />
                                 <Label htmlFor="r1">Income</Label>
                             </div>
 
@@ -140,14 +149,14 @@ const AddTransaction = () => {
                                     Field Required  <span className="text-destructive">*</span>
                                 </FieldLabel>
                                 <Input id='Amount' name="Amount" placeholder="Amount" required type="number" value={amount}
-                                onChange={(e)=>{setAmount(Number(e.target.value))}} />
+                                    onChange={(e) => { setAmount(Number(e.target.value)) }} />
                             </Field>
 
                             <Field>
                                 <FieldLabel>
                                     Field Required  <span className="text-destructive">*</span>
                                 </FieldLabel>
-                                <Select onValueChange={(value:string)=>{setCategory(value)}}>
+                                <Select onValueChange={(value: string) => { setCategory(value) }}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Select a Category" />
                                     </SelectTrigger>
@@ -165,7 +174,7 @@ const AddTransaction = () => {
 
                             <Field>
                                 <Input id='Description' name="Description" placeholder="Description" required type="text" value={description}
-                                onChange={(e)=>setDescription(e.target.value)} />
+                                    onChange={(e) => setDescription(e.target.value)} />
                             </Field>
 
                             <Field>
@@ -198,8 +207,29 @@ const AddTransaction = () => {
 
                     </CardContent>
                     <CardFooter className="flex items-center justify-center">
+
                         <Button className="bg-navy text-white font-semibold text-xl w-[100%] hover:bg-navyHover
-                        cursor-pointer" onClick={addTransaction}>{location.state ? 'Update Transaction' : '+ Add Transaction'}</Button>
+                        cursor-pointer"
+                            onClick={() =>{
+                                const success=addTransaction()
+                                if(success){
+                                    toast.success("Transaction Added Successfully", {
+                                        description: "Expense Recorded Successfully",
+                                        action: {
+                                            label: "Undo",
+                                            onClick: () =>{undoTransaction(tid)},
+                                        },
+                                    })
+                                }else{
+                                    toast.error("Transaction failed, fill required field")
+                                }
+                            }
+                            }
+                        >
+                            {location.state ? 'Update Transaction' : '+ Add Transaction'}
+                        </Button>
+                        {/* <Button className="bg-navy text-white font-semibold text-xl w-[100%] hover:bg-navyHover
+                        cursor-pointer" onClick={addTransaction}>{location.state ? 'Update Transaction' : '+ Add Transaction'}</Button> */}
                     </CardFooter>
                 </Card>
             </div>
